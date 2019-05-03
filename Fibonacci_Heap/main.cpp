@@ -18,6 +18,20 @@ int main() {
     FibonacciHeap<int> fh;
     for(auto i = 0; i < 11; i++) fh.insert(i);
 
+    fh.displayHeap();
+    cout << endl;
+
+    cout << "Iterators test (before minimum extraction):" << endl;
+    for(auto &e : fh) cout << e << ", ";
+    cout << endl;
+    for(const auto &e : fh) cout << e << ", ";
+    cout << endl;
+    for(auto it = fh.rbegin(); it != fh.rend(); ++it) cout << *it << ", ";
+    cout << endl;
+    for(auto it = fh.crbegin(); it != fh.crend(); ++it) cout << *it << ", ";
+    cout << endl;
+    cout << endl;
+
     fh.removeMinimum();
     fh.displayHeap();
 
