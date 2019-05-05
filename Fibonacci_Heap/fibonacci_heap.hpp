@@ -92,15 +92,15 @@ inline node<T> *node<T>::getPrevNodeForIteration(){
 
             return parent;
         }
-        else if(!prev->iterMarked){
-            prev->iterMarked = true;
-
-            return prev;
-        }
         else if(!next->iterMarked){
             next->iterMarked = true;
 
             return next;
+        }
+        else if(!prev->iterMarked){
+            prev->iterMarked = true;
+
+            return prev;
         }
 
         node* bfs_ = this;
@@ -109,15 +109,15 @@ inline node<T> *node<T>::getPrevNodeForIteration(){
             bfs_ = bfs_->child;
         }while(bfs_ != NULL && bfs_->hasChildren() && !bfs_->child->iterMarked);
 
-        if(bfs_ != NULL && !bfs_->prev->iterMarked) {
-            bfs_->prev->iterMarked = true;
-
-            return bfs_->prev;
-        }
-        else if(bfs_ != NULL && !bfs_->next->iterMarked){
+        if(bfs_ != NULL && !bfs_->next->iterMarked) {
             bfs_->next->iterMarked = true;
 
             return bfs_->next;
+        }
+        else if(bfs_ != NULL && !bfs_->prev->iterMarked){
+            bfs_->prev->iterMarked = true;
+
+            return bfs_->prev;
         }
         else return NULL;
     }
@@ -285,14 +285,15 @@ class FibonacciHeap{
 
     protected:
         node<T>* heap;
+        T        max_val;
         size_t   num_elems;
         bool     wasDeletion = false;
 
     public:
-        FibonacciHeap()                           : heap(_empty()), num_elems(0){};
-        explicit FibonacciHeap(node<T> &s)        : heap(s), num_elems(0){};
-        FibonacciHeap(const FibonacciHeap &s)     : heap(s.heap), num_elems(s.num_elems){};
-        FibonacciHeap(FibonacciHeap &&s) noexcept : heap(s.heap), num_elems(s.num_elems){};
+        FibonacciHeap()                           : heap(_empty()), max_val(-1), num_elems(0){};
+        explicit FibonacciHeap(node<T> &s)        : heap(s), max_val(s->value), num_elems(1){};
+        FibonacciHeap(const FibonacciHeap &s)     : heap(s.heap), max_val(s.max_val), num_elems(s.num_elems){};
+        FibonacciHeap(FibonacciHeap &&s) noexcept : heap(s.heap), max_val(s.max_val), num_elems(s.num_elems){};
 
         inline node<T>* insert(T);
         inline void     merge(FibonacciHeap&);
@@ -303,6 +304,7 @@ class FibonacciHeap{
         inline bool     isEmpty() const                  { return heap == NULL; };
         inline T        getMinimum()                     { return heap->value; };
         inline node<T>* getRoot() const                  { return heap; };
+        inline T        getMaximum()                     { return max_val; };
         inline size_t   size() const                     { return num_elems; };
 
         inline Iterator             begin()   { return Iterator(heap, heap, wasDeletion); };
@@ -485,24 +487,26 @@ typename FibonacciHeap<T>::ConstReverseIterator const FibonacciHeap<T>::ConstRev
     return pom;
 }
 
-template<class T>
-node<T> *FibonacciHeap<T>::insert(T value){
+template<typename T>
+inline node<T> *FibonacciHeap<T>::insert(T value){
     node<T>* ret = _singleton(value);
+
     if(ret) num_elems++;
+    if(value > max_val) max_val = value;
 
     heap = _merge(heap, ret);
 
     return ret;
 }
 
-template<class T>
-void FibonacciHeap<T>::merge(FibonacciHeap &other){
+template<typename T>
+inline void FibonacciHeap<T>::merge(FibonacciHeap &other){
     heap = _merge(heap, other.heap);
     other.heap = _empty();
 }
 
-template<class T>
-T FibonacciHeap<T>::removeMinimum(){
+template<typename T>
+inline T FibonacciHeap<T>::removeMinimum(){
     node<T>* old = heap;
     heap = _removeMinimum(heap);
     T ret = old->value;
@@ -514,13 +518,13 @@ T FibonacciHeap<T>::removeMinimum(){
 }
 
 template<typename T>
-void FibonacciHeap<T>::displayHeap(){
+inline void FibonacciHeap<T>::displayHeap(){
     if(isEmpty()) std::cout << "Heap is empty!" << std::endl;
     else _displayHeap(heap);
 }
 
-template<class T>
-node<T> *FibonacciHeap<T>::_singleton(T value){
+template<typename T>
+inline node<T> *FibonacciHeap<T>::_singleton(T value){
     auto n = new node<T>;
     n->value = value;
     n->prev = n;
@@ -533,8 +537,8 @@ node<T> *FibonacciHeap<T>::_singleton(T value){
     return n;
 }
 
-template<class T>
-node<T> *FibonacciHeap<T>::_merge(node<T> *a, node<T> *b){
+template<typename T>
+inline node<T> *FibonacciHeap<T>::_merge(node<T> *a, node<T> *b){
     if(a == NULL) return b;
     if(b == NULL) return a;
     if(a->value > b->value){
@@ -553,8 +557,8 @@ node<T> *FibonacciHeap<T>::_merge(node<T> *a, node<T> *b){
     return a;
 }
 
-template<class T>
-void FibonacciHeap<T>::_deleteAll(node<T> *n){
+template<typename T>
+inline void FibonacciHeap<T>::_deleteAll(node<T> *n){
     if(n != NULL) {
         node<T>* c = n;
         do{
@@ -566,8 +570,8 @@ void FibonacciHeap<T>::_deleteAll(node<T> *n){
     }
 }
 
-template<class T>
-void FibonacciHeap<T>::_addChild(node<T> *parent, node<T> *child){
+template<typename T>
+inline void FibonacciHeap<T>::_addChild(node<T> *parent, node<T> *child){
     child->prev = child;
     child->next = child;
     child->parent = parent;
@@ -575,8 +579,8 @@ void FibonacciHeap<T>::_addChild(node<T> *parent, node<T> *child){
     parent->child = _merge(parent->child, child);
 }
 
-template<class T>
-void FibonacciHeap<T>::_unMarkAndUnParentAll(node<T> *n){
+template<typename T>
+inline void FibonacciHeap<T>::_unMarkAndUnParentAll(node<T> *n){
     if(n == NULL) return;
 
     node<T>* c = n;
@@ -588,8 +592,8 @@ void FibonacciHeap<T>::_unMarkAndUnParentAll(node<T> *n){
     }while(c != n);
 }
 
-template<class T>
-node<T> *FibonacciHeap<T>::_removeMinimum(node<T> *n){
+template<typename T>
+inline node<T> *FibonacciHeap<T>::_removeMinimum(node<T> *n){
     _unMarkAndUnParentAll(n->child);
 
     if(n->next == n) n = n->child;
@@ -655,8 +659,8 @@ node<T> *FibonacciHeap<T>::_removeMinimum(node<T> *n){
     return min;
 }
 
-template<class T>
-node<T> *FibonacciHeap<T>::_cut(node<T> *heap_, node<T> *n){
+template<typename T>
+inline node<T> *FibonacciHeap<T>::_cut(node<T> *heap_, node<T> *n){
     if(n->next == n) n->parent->child = NULL;
     else{
         n->next->prev = n->prev;
@@ -670,8 +674,8 @@ node<T> *FibonacciHeap<T>::_cut(node<T> *heap_, node<T> *n){
     return _merge(heap_, n);
 }
 
-template<class T>
-node<T> *FibonacciHeap<T>::_decreaseKey(node<T> *heap_, node<T> *n, T value){
+template<typename T>
+inline node<T> *FibonacciHeap<T>::_decreaseKey(node<T> *heap_, node<T> *n, T value){
     if(n->value < value) return heap_;
 
     n->value = value;
@@ -697,14 +701,15 @@ node<T> *FibonacciHeap<T>::_decreaseKey(node<T> *heap_, node<T> *n, T value){
     return heap_;
 }
 
-template<class T>
-node<T> *FibonacciHeap<T>::_find(node<T> *heap_, T value){
+template<typename T>
+inline node<T> *FibonacciHeap<T>::_find(node<T> *heap_, T value){
     node<T>* n = heap_;
 
     if(n == NULL) return NULL;
 
     do{
         if(n->value == value) return n;
+
         node<T>* ret = _find(n->child, value);
 
         if(ret) return ret;
@@ -716,11 +721,12 @@ node<T> *FibonacciHeap<T>::_find(node<T> *heap_, T value){
 }
 
 template<typename T>
-void FibonacciHeap<T>::_displayHeap(node<T> *in) {
+inline void FibonacciHeap<T>::_displayHeap(node<T> *in) {
     if(in){
         node<T> *c = in;
 
         std::cout << "Minimum -> " << heap->value << std::endl;
+        std::cout << "Maximum -> " << getMaximum() << std::endl;
         do{
             _displayChildrens(c);
             c = c->next;
@@ -729,7 +735,7 @@ void FibonacciHeap<T>::_displayHeap(node<T> *in) {
 }
 
 template<typename T>
-void FibonacciHeap<T>::_displayChildrens(node<T> *n){
+inline void FibonacciHeap<T>::_displayChildrens(node<T> *n){
     if(n){
         std::cout << "value: " << n->value << (n->marked ? " (marked)" : " (not marked)") << " -> next: " << n->next->value << (n->next->marked ? " (marked)" : " (not marked)") << std::endl;
         std::cout << "value: " << n->value << (n->marked ? " (marked)" : " (not marked)") << " -> prev: " << n->prev->value << (n->prev->marked ? " (marked)" : " (not marked)") << std::endl;

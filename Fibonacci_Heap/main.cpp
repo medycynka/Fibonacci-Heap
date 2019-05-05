@@ -13,7 +13,7 @@ const size_t test3 = 1000000;      // 10^6
 const size_t test4 = 10000000;     // 10^7
 
 int main() {
-    cout << setprecision(8) << fixed;
+    cout << setprecision(12) << fixed;
 
     FibonacciHeap<int> fh;
     for(auto i = 0; i < 11; i++) fh.insert(i);
@@ -33,7 +33,11 @@ int main() {
     cout << endl;
 
     fh.removeMinimum();
+
     fh.displayHeap();
+    cout << endl << "Iterators test (after minimum extraction):" << endl;
+    for(auto &e : fh) cout << e << ", ";
+    cout << endl << endl << endl;
 
     FibonacciHeap<int> fh_1;
     cout << "Insert and extract-min test for " << test1 << " elements" << endl;
