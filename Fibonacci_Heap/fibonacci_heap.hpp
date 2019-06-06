@@ -16,8 +16,8 @@ class node{
         bool     iterMarked = false;
 
     public:
-        node()                  : value(-1), prev(NULL), next(NULL), child(NULL), parent(NULL), degree(0), marked(false){};
-        explicit node(T val)    : value(val), prev(NULL), next(NULL), child(NULL), parent(NULL), degree(0), marked(false){};
+        node()                  : value(-1), prev(nullptr), next(nullptr), child(nullptr), parent(nullptr), degree(0), marked(false){};
+        explicit node(T val)    : value(val), prev(nullptr), next(nullptr), child(nullptr), parent(nullptr), degree(0), marked(false){};
         node(const node &s)     : value(s.getValue()), prev(s.prev), next(s.next), child(s.child), parent(s.parent), degree(s.degree), marked(s.marked){};
         node(node &&s) noexcept : value(s.getValue()), prev(s.prev), next(s.next), child(s.child), parent(s.parent), degree(s.degree), marked(s.marked){};
         ~node() = default;
@@ -41,11 +41,26 @@ class node{
         bool operator< ( const node &source) const { return value < source.value; };
         bool operator>=( const node &source) const { return value >= source.value; };
         bool operator<=( const node &source) const { return value <= source.value; };
+
+        friend std::ostream& operator<<(std::ostream& ofs, const node<T>* pt){
+            ofs << "Value: " << pt->value << " ,degree: " << pt->degree << (pt->marked ? " ,marked" : " ,not marked") << "\n";
+
+            if(pt->parent) ofs << "Parent value: " << pt->parent->value << " ,degree: " << pt->parent->degree << (pt->parent->marked ? " ,marked" : " ,not marked") << "\n";
+            else ofs << "No parent (one of the roots)" << "\n";
+
+            if(pt->next) ofs << "Next node value: " << pt->next->value << " ,degree: " << pt->next->degree << (pt->next->marked ? " ,marked" : " ,not marked") << "\n";
+            else ofs << "No next node" << "\n";
+
+            if(pt->prev) ofs << "Previous node value: " << pt->prev->value << " ,degree: " << pt->prev->degree << (pt->prev->marked ? " ,marked" : " ,not marked") << "\n\n";
+            else ofs << "No previous node" << "\n\n";
+
+            return ofs;
+        };
 };
 
 template<typename T>
 inline node<T> *node<T>::getNextNodeForIteration(){
-    if(this != NULL){
+    if(this != nullptr){
         if(hasChildren() && !child->iterMarked){
             child->iterMarked = true;
 
@@ -66,92 +81,79 @@ inline node<T> *node<T>::getNextNodeForIteration(){
 
         do{
             bfs_ = bfs_->parent;
-        }while(bfs_ != NULL && bfs_->hasParent() && !bfs_->parent->iterMarked);
+        }while(bfs_ != nullptr && bfs_->hasParent() && !bfs_->parent->iterMarked);
 
-        if(bfs_ != NULL && !bfs_->prev->iterMarked) {
+        if(bfs_ != nullptr && !bfs_->prev->iterMarked) {
             bfs_->prev->iterMarked = true;
 
             return bfs_->prev;
         }
-        else if(bfs_ != NULL && !bfs_->next->iterMarked){
+        else if(bfs_ != nullptr && !bfs_->next->iterMarked){
             bfs_->next->iterMarked = true;
 
             return bfs_->next;
         }
-        else return NULL;
+        else return nullptr;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 template<typename T>
 inline node<T> *node<T>::getPrevNodeForIteration(){
-    if(this != NULL){
+    if(this != nullptr){
         if(hasParent() && !parent->iterMarked){
             parent->iterMarked = true;
 
             return parent;
-        }
-        else if(!next->iterMarked){
-            next->iterMarked = true;
-
-            return next;
         }
         else if(!prev->iterMarked){
             prev->iterMarked = true;
 
             return prev;
         }
+        else if(!next->iterMarked){
+            next->iterMarked = true;
+
+            return next;
+        }
 
         node* bfs_ = this;
 
         do{
             bfs_ = bfs_->child;
-        }while(bfs_ != NULL && bfs_->hasChildren() && !bfs_->child->iterMarked);
+        }while(bfs_ != nullptr && bfs_->hasChildren() && !bfs_->child->iterMarked);
 
-        if(bfs_ != NULL && !bfs_->next->iterMarked) {
-            bfs_->next->iterMarked = true;
-
-            return bfs_->next;
-        }
-        else if(bfs_ != NULL && !bfs_->prev->iterMarked){
+        if(bfs_ != nullptr && !bfs_->prev->iterMarked) {
             bfs_->prev->iterMarked = true;
 
             return bfs_->prev;
         }
-        else return NULL;
+        else if(bfs_ != nullptr && !bfs_->next->iterMarked){
+            bfs_->next->iterMarked = true;
+
+            return bfs_->next;
+        }
+        else return nullptr;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 template<typename T>
 void node<T>::printNode(){
-    std::cout << "Value: " << value << " ,degree: " << degree;
-    std::cout << (marked ? " ,marked" : " ,not marked") << std::endl;
+    std::cout << "Value: " << value << " ,degree: " << degree << (marked ? " ,marked" : " ,not marked") << std::endl;
 
-    if(parent){
-        std::cout << "Parent value: " << parent->value << " ,degree: " << parent->degree;;
-        std::cout << (parent->marked ? " ,marked" : " ,not marked") << std::endl;
-    }
+    if(parent) std::cout << "Parent value: " << parent->value << " ,degree: " << parent->degree << (parent->marked ? " ,marked" : " ,not marked") << std::endl;
     else std::cout << "No parent (one of the roots)" << std::endl;
 
-    if(next){
-        std::cout << "Next node value: " << next->value << " ,degree: " << next->degree;;
-        std::cout << (next->marked ? " ,marked" : " ,not marked") << std::endl;
-    }
+    if(next) std::cout << "Next node value: " << next->value << " ,degree: " << next->degree << (next->marked ? " ,marked" : " ,not marked") << std::endl;
     else std::cout << "No next node" << std::endl;
 
-    if(prev){
-        std::cout << "Previous node value: " << prev->value << " ,degree: " << prev->degree;;
-        std::cout << (prev->marked ? " ,marked" : " ,not marked") << std::endl;
-    }
+    if(prev) std::cout << "Previous node value: " << prev->value << " ,degree: " << prev->degree << (prev->marked ? " ,marked" : " ,not marked") << std::endl;
     else std::cout << "No previous node" << std::endl;
 
-    if(child){
-        std::cout << "Child value: " << child->value << " ,degree: " << child->degree;;
-        std::cout << (child->marked ? " ,marked" : " ,not marked") << std::endl;
-    }
+    if(child)  std::cout << "Child value: " << child->value << " ,degree: " << child->degree << (child->marked ? " ,marked" : " ,not marked") << std::endl;
     else std::cout << "No child node" << std::endl;
 
     std::cout << std::endl;
@@ -161,7 +163,7 @@ template <typename T>
 class FibonacciHeap{
     public:
         /**
-         * TODO : make ReverseIterator and ConstReverseIterator work also after minimum extraction (make getPrevNodeForIteration() works)
+         * TODO : make ReverseIterator and ConstReverseIterator work also after minimum extraction (make getPrevNodeForIteration() works corectly)
         */
         class Iterator{
             private:
@@ -170,130 +172,161 @@ class FibonacciHeap{
                 bool      wasExtraction;
 
             public:
-                Iterator()                                : Iter(NULL), pomHeap(NULL), wasExtraction(false){};
+                friend class FibonacciHeap;
+                typedef Iterator                  self_type;
+                typedef T                         value_type;
+                typedef T&                        reference;
+                typedef T*                        pointer;
+                typedef std::forward_iterator_tag iterator_category;
+                typedef int                       difference_type;
+
+                Iterator()                                : Iter(nullptr), pomHeap(nullptr), wasExtraction(false){};
                 Iterator(const Iterator &s)               : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
                 Iterator(Iterator &&s) noexcept           : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
-                explicit Iterator(node<T> *s)             : Iter(s), pomHeap(NULL), wasExtraction(false){};
-                explicit Iterator(bool &s)                : Iter(NULL), pomHeap(NULL), wasExtraction(s){}
+                explicit Iterator(node<T> *s)             : Iter(s), pomHeap(nullptr), wasExtraction(false){};
+                explicit Iterator(bool &s)                : Iter(nullptr), pomHeap(nullptr), wasExtraction(s){}
                 Iterator(node<T> *s, node<T> *h)          : Iter(s), pomHeap(h), wasExtraction(false){};
                 Iterator(node<T> *s, node<T> *h, bool &w) : Iter(s), pomHeap(h), wasExtraction(w){};
 
-                Iterator   operator++             ();
-                Iterator   operator++             (int);
-                Iterator   operator--             ();
-                Iterator   operator--             (int);
-                Iterator & operator=              (const Iterator &source)       { this->Iter = source.Iter; return (*this); };
-                Iterator & operator=              (Iterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
-                bool       operator==             (const Iterator& source) const { return (Iter == source.Iter); };
-                bool       operator!=             (const Iterator& source) const { return (Iter != source.Iter); };
+                Iterator       operator++         ();
+                const Iterator operator++         (int);
+                Iterator       operator--         ();
+                const Iterator operator--         (int);
+                Iterator &     operator=          (const Iterator &source)       { this->Iter = source.Iter; return (*this); };
+                Iterator &     operator=          (Iterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
+                bool           operator==         (const Iterator& source) const { return (Iter == source.Iter); };
+                bool           operator!=         (const Iterator& source) const { return (Iter != source.Iter); };
                 explicit operator node<T> &       ()                             { return (*Iter); };
                 explicit operator const node<T> & ()                       const { return (*Iter); };
                 T &        operator*              ()                       const { return (Iter->value); };
                 node<T> *  operator->             ()                       const { return Iter; };
-                explicit operator bool            ()                       const { return (Iter != NULL); };
+                explicit operator bool            ()                       const { return (Iter != nullptr); };
         };
 
-    class ConstIterator{
-        private:
-            node<T> * Iter;
-            node<T> * pomHeap;
-            bool      wasExtraction;
+        class ConstIterator{
+            private:
+                node<T> * Iter;
+                node<T> * pomHeap;
+                bool      wasExtraction;
 
-        public:
-            ConstIterator()                                : Iter(NULL), pomHeap(NULL), wasExtraction(false){};
-            ConstIterator(const ConstIterator &s)          : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
-            ConstIterator(ConstIterator &&s) noexcept      : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
-            explicit ConstIterator(node<T> *s)             : Iter(s), pomHeap(NULL), wasExtraction(false){};
-            explicit ConstIterator(bool &s)                : Iter(NULL), pomHeap(NULL), wasExtraction(s){}
-            ConstIterator(node<T> *s, node<T> *h)          : Iter(s), pomHeap(h), wasExtraction(false){};
-            ConstIterator(node<T> *s, node<T> *h, bool &w) : Iter(s), pomHeap(h), wasExtraction(w){};
+            public:
+                friend class FibonacciHeap;
+                typedef ConstIterator             self_type;
+                typedef T                         value_type;
+                typedef T&                        reference;
+                typedef T*                        pointer;
+                typedef std::forward_iterator_tag iterator_category;
+                typedef int                       difference_type;
 
-            ConstIterator const operator++    ();
-            ConstIterator const operator++    (int);
-            ConstIterator const operator--    ();
-            ConstIterator const operator--    (int);
-            ConstIterator &     operator=     (const ConstIterator &source)       { this->Iter = source.Iter; return (*this); };
-            ConstIterator &     operator=     (ConstIterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
-            bool                operator==    (const ConstIterator& source) const { return (Iter == source.Iter); };
-            bool                operator!=    (const ConstIterator& source) const { return (Iter != source.Iter); };
-            explicit operator node<T> &       ()                                  { return (*Iter); };
-            explicit operator const node<T> & ()                            const { return (*Iter); };
-            T const &           operator*     ()                            const { return (Iter->value); };
-            node<T> const *     operator->    ()                            const { return Iter; };
-            explicit operator bool            ()                            const { return (Iter != NULL); };
-    };
+                ConstIterator()                                : Iter(nullptr), pomHeap(nullptr), wasExtraction(false){};
+                ConstIterator(const ConstIterator &s)          : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
+                ConstIterator(ConstIterator &&s) noexcept      : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
+                explicit ConstIterator(node<T> *s)             : Iter(s), pomHeap(nullptr), wasExtraction(false){};
+                explicit ConstIterator(bool &s)                : Iter(nullptr), pomHeap(nullptr), wasExtraction(s){}
+                ConstIterator(node<T> *s, node<T> *h)          : Iter(s), pomHeap(h), wasExtraction(false){};
+                ConstIterator(node<T> *s, node<T> *h, bool &w) : Iter(s), pomHeap(h), wasExtraction(w){};
 
-    class ReverseIterator{
-        private:
-            node<T> * Iter;
-            node<T> * pomHeap;
-            bool      wasExtraction;
+                ConstIterator const operator++    ();
+                ConstIterator const operator++    (int);
+                ConstIterator const operator--    ();
+                ConstIterator const operator--    (int);
+                ConstIterator &     operator=     (const ConstIterator &source)       { this->Iter = source.Iter; return (*this); };
+                ConstIterator &     operator=     (ConstIterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
+                bool                operator==    (const ConstIterator& source) const { return (Iter == source.Iter); };
+                bool                operator!=    (const ConstIterator& source) const { return (Iter != source.Iter); };
+                explicit operator node<T> &       ()                                  { return (*Iter); };
+                explicit operator const node<T> & ()                            const { return (*Iter); };
+                T const &           operator*     ()                            const { return (Iter->value); };
+                node<T> const *     operator->    ()                            const { return Iter; };
+                explicit operator bool            ()                            const { return (Iter != nullptr); };
+        };
 
-        public:
-            ReverseIterator()                                : Iter(NULL), pomHeap(NULL), wasExtraction(false){};
-            ReverseIterator(const ReverseIterator &s)        : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
-            ReverseIterator(ReverseIterator &&s) noexcept    : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
-            explicit ReverseIterator(node<T> *s)             : Iter(s), pomHeap(NULL), wasExtraction(false){};
-            explicit ReverseIterator(bool &s)                : Iter(NULL), pomHeap(NULL), wasExtraction(s){}
-            ReverseIterator(node<T> *s, node<T> *h)          : Iter(s), pomHeap(h), wasExtraction(false){};
-            ReverseIterator(node<T> *s, node<T> *h, bool &w) : Iter(s), pomHeap(h), wasExtraction(w){};
+        class ReverseIterator{
+            private:
+                node<T> * Iter;
+                node<T> * pomHeap;
+                bool      wasExtraction;
 
-            ReverseIterator   operator++      ();
-            ReverseIterator   operator++      (int);
-            ReverseIterator   operator--      ();
-            ReverseIterator   operator--      (int);
-            ReverseIterator & operator=       (const ReverseIterator &source)       { this->Iter = source.Iter; return (*this); };
-            ReverseIterator & operator=       (ReverseIterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
-            bool              operator==      (const ReverseIterator& source) const { return (Iter == source.Iter); };
-            bool              operator!=      (const ReverseIterator& source) const { return (Iter != source.Iter); };
-            explicit operator node<T> &       ()                                    { return (*Iter); };
-            explicit operator const node<T> & ()                              const { return (*Iter); };
-            T &               operator*       ()                              const { return (Iter->value); };
-            node<T> *         operator->      ()                              const { return Iter; };
-            explicit operator bool            ()                              const { return (Iter != NULL); };
-    };
+            public:
+                friend class FibonacciHeap;
+                typedef ReverseIterator           self_type;
+                typedef T                         value_type;
+                typedef T&                        reference;
+                typedef T*                        pointer;
+                typedef std::forward_iterator_tag iterator_category;
+                typedef int                       difference_type;
 
-    class ConstReverseIterator{
-        private:
-            node<T> * Iter;
-            node<T> * pomHeap;
-            bool      wasExtraction;
+                ReverseIterator()                                : Iter(nullptr), pomHeap(nullptr), wasExtraction(false){};
+                ReverseIterator(const ReverseIterator &s)        : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
+                ReverseIterator(ReverseIterator &&s) noexcept    : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
+                explicit ReverseIterator(node<T> *s)             : Iter(s), pomHeap(nullptr), wasExtraction(false){};
+                explicit ReverseIterator(bool &s)                : Iter(nullptr), pomHeap(nullptr), wasExtraction(s){}
+                ReverseIterator(node<T> *s, node<T> *h)          : Iter(s), pomHeap(h), wasExtraction(false){};
+                ReverseIterator(node<T> *s, node<T> *h, bool &w) : Iter(s), pomHeap(h), wasExtraction(w){};
 
-        public:
-            ConstReverseIterator()                                  : Iter(NULL), pomHeap(NULL), wasExtraction(false){};
-            ConstReverseIterator(const ConstReverseIterator &s)     : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
-            ConstReverseIterator(ConstReverseIterator &&s) noexcept : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
-            explicit ConstReverseIterator(node<T> *s)               : Iter(s), pomHeap(NULL), wasExtraction(false){};
-            explicit ConstReverseIterator(bool &s)                  : Iter(NULL), pomHeap(NULL), wasExtraction(s){}
-            ConstReverseIterator(node<T> *s, node<T> *h)            : Iter(s), pomHeap(h), wasExtraction(false){};
-            ConstReverseIterator(node<T> *s, node<T> *h, bool &w)   : Iter(s), pomHeap(h), wasExtraction(w){};
+                ReverseIterator       operator++  ();
+                const ReverseIterator operator++  (int);
+                ReverseIterator       operator--  ();
+                const ReverseIterator operator--  (int);
+                ReverseIterator &     operator=   (const ReverseIterator &source)       { this->Iter = source.Iter; return (*this); };
+                ReverseIterator &     operator=   (ReverseIterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
+                bool                  operator==  (const ReverseIterator& source) const { return (Iter == source.Iter); };
+                bool                  operator!=  (const ReverseIterator& source) const { return (Iter != source.Iter); };
+                explicit operator node<T> &       ()                                    { return (*Iter); };
+                explicit operator const node<T> & ()                              const { return (*Iter); };
+                T &                   operator*   ()                              const { return (Iter->value); };
+                node<T> *             operator->  ()                              const { return Iter; };
+                explicit operator bool            ()                              const { return (Iter != nullptr); };
+        };
 
-            ConstReverseIterator const operator++();
-            ConstReverseIterator const operator++(int);
-            ConstReverseIterator const operator--();
-            ConstReverseIterator const operator--(int);
-            ConstReverseIterator &     operator= (const ConstReverseIterator &source)       { this->Iter = source.Iter; return (*this); };
-            ConstReverseIterator &     operator= (ConstReverseIterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
-            bool                       operator==(const ConstReverseIterator& source) const { return (Iter == source.Iter); };
-            bool                       operator!=(const ConstReverseIterator& source) const { return (Iter != source.Iter); };
-            explicit operator node<T> &          ()                                         { return (*Iter); };
-            explicit operator const node<T> &    ()                                   const { return (*Iter); };
-            T const &                  operator* ()                                   const { return (Iter->value); };
-            node<T> const *            operator->()                                   const { return Iter; };
-            explicit operator bool               ()                                   const { return (Iter != NULL); };
-    };
+        class ConstReverseIterator{
+            private:
+                node<T> * Iter;
+                node<T> * pomHeap;
+                bool      wasExtraction;
+
+            public:
+                friend class FibonacciHeap;
+                typedef ConstReverseIterator      self_type;
+                typedef T                         value_type;
+                typedef T&                        reference;
+                typedef T*                        pointer;
+                typedef std::forward_iterator_tag iterator_category;
+                typedef int                       difference_type;
+
+                ConstReverseIterator()                                  : Iter(nullptr), pomHeap(nullptr), wasExtraction(false){};
+                ConstReverseIterator(const ConstReverseIterator &s)     : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
+                ConstReverseIterator(ConstReverseIterator &&s) noexcept : Iter(s.Iter), pomHeap(s.pomHeap), wasExtraction(s.wasExtraction){};
+                explicit ConstReverseIterator(node<T> *s)               : Iter(s), pomHeap(nullptr), wasExtraction(false){};
+                explicit ConstReverseIterator(bool &s)                  : Iter(nullptr), pomHeap(nullptr), wasExtraction(s){}
+                ConstReverseIterator(node<T> *s, node<T> *h)            : Iter(s), pomHeap(h), wasExtraction(false){};
+                ConstReverseIterator(node<T> *s, node<T> *h, bool &w)   : Iter(s), pomHeap(h), wasExtraction(w){};
+
+                ConstReverseIterator const operator++();
+                ConstReverseIterator const operator++(int);
+                ConstReverseIterator const operator--();
+                ConstReverseIterator const operator--(int);
+                ConstReverseIterator &     operator= (const ConstReverseIterator &source)       { this->Iter = source.Iter; return (*this); };
+                ConstReverseIterator &     operator= (ConstReverseIterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
+                bool                       operator==(const ConstReverseIterator& source) const { return (Iter == source.Iter); };
+                bool                       operator!=(const ConstReverseIterator& source) const { return (Iter != source.Iter); };
+                explicit operator node<T> &          ()                                         { return (*Iter); };
+                explicit operator const node<T> &    ()                                   const { return (*Iter); };
+                T const &                  operator* ()                                   const { return (Iter->value); };
+                node<T> const *            operator->()                                   const { return Iter; };
+                explicit operator bool               ()                                   const { return (Iter != nullptr); };
+        };
 
     protected:
         node<T>* heap;
-        T        max_val;
         size_t   num_elems;
         bool     wasDeletion = false;
 
     public:
-        FibonacciHeap()                           : heap(_empty()), max_val(-1), num_elems(0){};
-        explicit FibonacciHeap(node<T> &s)        : heap(s), max_val(s->value), num_elems(1){};
-        FibonacciHeap(const FibonacciHeap &s)     : heap(s.heap), max_val(s.max_val), num_elems(s.num_elems){};
-        FibonacciHeap(FibonacciHeap &&s) noexcept : heap(s.heap), max_val(s.max_val), num_elems(s.num_elems){};
+        FibonacciHeap()                           : heap(_empty()), num_elems(0){};
+        explicit FibonacciHeap(node<T> &s)        : heap(s), num_elems(0){};
+        FibonacciHeap(const FibonacciHeap &s)     : heap(s.heap), num_elems(s.num_elems){};
+        FibonacciHeap(FibonacciHeap &&s) noexcept : heap(s.heap), num_elems(s.num_elems){};
 
         inline node<T>* insert(T);
         inline void     merge(FibonacciHeap&);
@@ -301,10 +334,9 @@ class FibonacciHeap{
         inline void     displayHeap();
         inline void     decreaseKey(node<T>* n, T value) { heap = _decreaseKey(heap, n, value); };
         inline node<T>* find(T value)                    { return _find(heap, value); };
-        inline bool     isEmpty() const                  { return heap == NULL; };
+        inline bool     isEmpty() const                  { return heap == nullptr; };
         inline T        getMinimum()                     { return heap->value; };
         inline node<T>* getRoot() const                  { return heap; };
-        inline T        getMaximum()                     { return max_val; };
         inline size_t   size() const                     { return num_elems; };
 
         inline Iterator             begin()   { return Iterator(heap, heap, wasDeletion); };
@@ -317,7 +349,7 @@ class FibonacciHeap{
         inline ConstReverseIterator crend()   { return ConstReverseIterator(wasDeletion); };
 
     private:
-        inline node<T>* _empty(){ return NULL; }
+        inline node<T>* _empty(){ return nullptr; }
         inline node<T>* _singleton(T);
         inline node<T>* _merge(node<T>*, node<T>*);
         inline void     _deleteAll(node<T>*);
@@ -335,7 +367,7 @@ template<typename T>
 typename FibonacciHeap<T>::Iterator FibonacciHeap<T>::Iterator::operator++(){
     if(!wasExtraction){
         if(this->Iter->next != this->pomHeap) this->Iter = this->Iter->next;
-        else this->Iter = NULL;
+        else this->Iter = nullptr;
     }
     else{
         this->Iter = this->Iter->getNextNodeForIteration();
@@ -345,7 +377,7 @@ typename FibonacciHeap<T>::Iterator FibonacciHeap<T>::Iterator::operator++(){
 }
 
 template<typename T>
-typename FibonacciHeap<T>::Iterator FibonacciHeap<T>::Iterator::operator++(int){
+const typename FibonacciHeap<T>::Iterator FibonacciHeap<T>::Iterator::operator++(int){
     auto pom = *this;
     ++(*this);
 
@@ -356,7 +388,7 @@ template<typename T>
 typename FibonacciHeap<T>::Iterator FibonacciHeap<T>::Iterator::operator--(){
     if(!wasExtraction) {
         if(this->Iter->prev != this->pomHeap) this->Iter = Iter->prev;
-        else this->Iter = NULL;
+        else this->Iter = nullptr;
     }
     else this->Iter = this->Iter->getPrevNodeForIteration();
 
@@ -364,7 +396,7 @@ typename FibonacciHeap<T>::Iterator FibonacciHeap<T>::Iterator::operator--(){
 }
 
 template<typename T>
-typename FibonacciHeap<T>::Iterator FibonacciHeap<T>::Iterator::operator--(int){
+const typename FibonacciHeap<T>::Iterator FibonacciHeap<T>::Iterator::operator--(int){
     auto pom = *this;
     --(*this);
 
@@ -375,7 +407,7 @@ template<typename T>
 typename FibonacciHeap<T>::ConstIterator const FibonacciHeap<T>::ConstIterator::operator++(){
     if(!wasExtraction){
         if(this->Iter->next != this->pomHeap) this->Iter = Iter->next;
-        else this->Iter = NULL;
+        else this->Iter = nullptr;
     }
     else{
         this->Iter = this->Iter->getNextNodeForIteration();
@@ -396,7 +428,7 @@ template<typename T>
 typename FibonacciHeap<T>::ConstIterator const FibonacciHeap<T>::ConstIterator::operator--(){
     if(!wasExtraction) {
         if(this->Iter->prev != this->pomHeap) this->Iter = Iter->prev;
-        else this->Iter = NULL;
+        else this->Iter = nullptr;
     }
     else this->Iter = this->Iter->getPrevNodeForIteration();
 
@@ -415,7 +447,7 @@ template<typename T>
 typename FibonacciHeap<T>::ReverseIterator FibonacciHeap<T>::ReverseIterator::operator++(){
     if(!wasExtraction) {
         if (this->Iter->prev != this->pomHeap) this->Iter = Iter->prev;
-        else this->Iter = NULL;
+        else this->Iter = nullptr;
     }
     else this->Iter = this->Iter->getPrevNodeForIteration();
 
@@ -423,7 +455,7 @@ typename FibonacciHeap<T>::ReverseIterator FibonacciHeap<T>::ReverseIterator::op
 }
 
 template<typename T>
-typename FibonacciHeap<T>::ReverseIterator FibonacciHeap<T>::ReverseIterator::operator++(int){
+const typename FibonacciHeap<T>::ReverseIterator FibonacciHeap<T>::ReverseIterator::operator++(int){
     auto pom = *this;
     ++(*this);
 
@@ -434,7 +466,7 @@ template<typename T>
 typename FibonacciHeap<T>::ReverseIterator FibonacciHeap<T>::ReverseIterator::operator--(){
     if(!wasExtraction){
         if (this->Iter->next != this->pomHeap) this->Iter = Iter->next;
-        else this->Iter = NULL;
+        else this->Iter = nullptr;
     }
     else this->Iter = this->Iter->getNextNodeForIteration();
 
@@ -442,7 +474,7 @@ typename FibonacciHeap<T>::ReverseIterator FibonacciHeap<T>::ReverseIterator::op
 }
 
 template<typename T>
-typename FibonacciHeap<T>::ReverseIterator FibonacciHeap<T>::ReverseIterator::operator--(int){
+const typename FibonacciHeap<T>::ReverseIterator FibonacciHeap<T>::ReverseIterator::operator--(int){
     auto pom = *this;
     --(*this);
 
@@ -453,7 +485,7 @@ template<typename T>
 typename FibonacciHeap<T>::ConstReverseIterator const FibonacciHeap<T>::ConstReverseIterator::operator++(){
     if(!wasExtraction) {
         if (this->Iter->prev != this->pomHeap) this->Iter = Iter->prev;
-        else this->Iter = NULL;
+        else this->Iter = nullptr;
     }
     else this->Iter = this->Iter->getPrevNodeForIteration();
 
@@ -472,7 +504,7 @@ template<typename T>
 typename FibonacciHeap<T>::ConstReverseIterator const FibonacciHeap<T>::ConstReverseIterator::operator--(){
     if(!wasExtraction){
         if (this->Iter->next != this->pomHeap) this->Iter = Iter->next;
-        else this->Iter = NULL;
+        else this->Iter = nullptr;
     }
     else this->Iter = this->Iter->getNextNodeForIteration();
 
@@ -487,26 +519,24 @@ typename FibonacciHeap<T>::ConstReverseIterator const FibonacciHeap<T>::ConstRev
     return pom;
 }
 
-template<typename T>
-inline node<T> *FibonacciHeap<T>::insert(T value){
+template<class T>
+node<T> *FibonacciHeap<T>::insert(T value){
     node<T>* ret = _singleton(value);
-
     if(ret) num_elems++;
-    if(value > max_val) max_val = value;
 
     heap = _merge(heap, ret);
 
     return ret;
 }
 
-template<typename T>
-inline void FibonacciHeap<T>::merge(FibonacciHeap &other){
+template<class T>
+void FibonacciHeap<T>::merge(FibonacciHeap &other){
     heap = _merge(heap, other.heap);
     other.heap = _empty();
 }
 
-template<typename T>
-inline T FibonacciHeap<T>::removeMinimum(){
+template<class T>
+T FibonacciHeap<T>::removeMinimum(){
     node<T>* old = heap;
     heap = _removeMinimum(heap);
     T ret = old->value;
@@ -518,29 +548,29 @@ inline T FibonacciHeap<T>::removeMinimum(){
 }
 
 template<typename T>
-inline void FibonacciHeap<T>::displayHeap(){
+void FibonacciHeap<T>::displayHeap(){
     if(isEmpty()) std::cout << "Heap is empty!" << std::endl;
     else _displayHeap(heap);
 }
 
-template<typename T>
-inline node<T> *FibonacciHeap<T>::_singleton(T value){
+template<class T>
+node<T> *FibonacciHeap<T>::_singleton(T value){
     auto n = new node<T>;
     n->value = value;
     n->prev = n;
     n->next = n;
     n->degree = 0;
     n->marked = false;
-    n->child = NULL;
-    n->parent = NULL;
+    n->child = nullptr;
+    n->parent = nullptr;
 
     return n;
 }
 
-template<typename T>
-inline node<T> *FibonacciHeap<T>::_merge(node<T> *a, node<T> *b){
-    if(a == NULL) return b;
-    if(b == NULL) return a;
+template<class T>
+node<T> *FibonacciHeap<T>::_merge(node<T> *a, node<T> *b){
+    if(a == nullptr) return b;
+    if(b == nullptr) return a;
     if(a->value > b->value){
         node<T>* temp = a;
         a = b;
@@ -557,9 +587,9 @@ inline node<T> *FibonacciHeap<T>::_merge(node<T> *a, node<T> *b){
     return a;
 }
 
-template<typename T>
-inline void FibonacciHeap<T>::_deleteAll(node<T> *n){
-    if(n != NULL) {
+template<class T>
+void FibonacciHeap<T>::_deleteAll(node<T> *n){
+    if(n != nullptr) {
         node<T>* c = n;
         do{
             node<T>* d = c;
@@ -570,8 +600,8 @@ inline void FibonacciHeap<T>::_deleteAll(node<T> *n){
     }
 }
 
-template<typename T>
-inline void FibonacciHeap<T>::_addChild(node<T> *parent, node<T> *child){
+template<class T>
+void FibonacciHeap<T>::_addChild(node<T> *parent, node<T> *child){
     child->prev = child;
     child->next = child;
     child->parent = parent;
@@ -579,21 +609,21 @@ inline void FibonacciHeap<T>::_addChild(node<T> *parent, node<T> *child){
     parent->child = _merge(parent->child, child);
 }
 
-template<typename T>
-inline void FibonacciHeap<T>::_unMarkAndUnParentAll(node<T> *n){
-    if(n == NULL) return;
+template<class T>
+void FibonacciHeap<T>::_unMarkAndUnParentAll(node<T> *n){
+    if(n == nullptr) return;
 
     node<T>* c = n;
 
     do{
         c->marked = false;
-        c->parent = NULL;
+        c->parent = nullptr;
         c = c->next;
     }while(c != n);
 }
 
-template<typename T>
-inline node<T> *FibonacciHeap<T>::_removeMinimum(node<T> *n){
+template<class T>
+node<T> *FibonacciHeap<T>::_removeMinimum(node<T> *n){
     _unMarkAndUnParentAll(n->child);
 
     if(n->next == n) n = n->child;
@@ -603,17 +633,17 @@ inline node<T> *FibonacciHeap<T>::_removeMinimum(node<T> *n){
         n = _merge(n->next, n->child);
     }
 
-    if(n == NULL) return n;
+    if(n == nullptr) return n;
 
-    node<T>* trees[64] = {NULL};
+    node<T>* trees[64] = {nullptr};
 
     while(true){
-        if(trees[n->degree]!=NULL){
+        if(trees[n->degree]!=nullptr){
             node<T>* t = trees[n->degree];
 
             if(t == n) break;
 
-            trees[n->degree] = NULL;
+            trees[n->degree] = nullptr;
 
             if(n->value < t->value){
                 t->prev->next = t->next;
@@ -659,9 +689,9 @@ inline node<T> *FibonacciHeap<T>::_removeMinimum(node<T> *n){
     return min;
 }
 
-template<typename T>
-inline node<T> *FibonacciHeap<T>::_cut(node<T> *heap_, node<T> *n){
-    if(n->next == n) n->parent->child = NULL;
+template<class T>
+node<T> *FibonacciHeap<T>::_cut(node<T> *heap_, node<T> *n){
+    if(n->next == n) n->parent->child = nullptr;
     else{
         n->next->prev = n->prev;
         n->prev->next = n->next;
@@ -674,8 +704,8 @@ inline node<T> *FibonacciHeap<T>::_cut(node<T> *heap_, node<T> *n){
     return _merge(heap_, n);
 }
 
-template<typename T>
-inline node<T> *FibonacciHeap<T>::_decreaseKey(node<T> *heap_, node<T> *n, T value){
+template<class T>
+node<T> *FibonacciHeap<T>::_decreaseKey(node<T> *heap_, node<T> *n, T value){
     if(n->value < value) return heap_;
 
     n->value = value;
@@ -684,16 +714,16 @@ inline node<T> *FibonacciHeap<T>::_decreaseKey(node<T> *heap_, node<T> *n, T val
         if(n->value < n->parent->value) {
             heap_ = _cut(heap_, n);
             node<T>* parent = n->parent;
-            n->parent = NULL;
+            n->parent = nullptr;
 
-            while(parent != NULL && parent->marked) {
+            while(parent != nullptr && parent->marked) {
                 heap_ = _cut(heap_, parent);
                 n = parent;
                 parent = n->parent;
-                n->parent = NULL;
+                n->parent = nullptr;
             }
 
-            if(parent != NULL && parent->parent != NULL) parent->marked = true;
+            if(parent != nullptr && parent->parent != nullptr) parent->marked = true;
         }
     }
     else if(n->value < heap_->value) heap_ = n;
@@ -701,15 +731,14 @@ inline node<T> *FibonacciHeap<T>::_decreaseKey(node<T> *heap_, node<T> *n, T val
     return heap_;
 }
 
-template<typename T>
-inline node<T> *FibonacciHeap<T>::_find(node<T> *heap_, T value){
+template<class T>
+node<T> *FibonacciHeap<T>::_find(node<T> *heap_, T value){
     node<T>* n = heap_;
 
-    if(n == NULL) return NULL;
+    if(n == nullptr) return nullptr;
 
     do{
         if(n->value == value) return n;
-
         node<T>* ret = _find(n->child, value);
 
         if(ret) return ret;
@@ -717,16 +746,15 @@ inline node<T> *FibonacciHeap<T>::_find(node<T> *heap_, T value){
         n = n->next;
     }while(n != heap_);
 
-    return NULL;
+    return nullptr;
 }
 
 template<typename T>
-inline void FibonacciHeap<T>::_displayHeap(node<T> *in) {
+void FibonacciHeap<T>::_displayHeap(node<T> *in) {
     if(in){
         node<T> *c = in;
 
         std::cout << "Minimum -> " << heap->value << std::endl;
-        std::cout << "Maximum -> " << getMaximum() << std::endl;
         do{
             _displayChildrens(c);
             c = c->next;
@@ -735,7 +763,7 @@ inline void FibonacciHeap<T>::_displayHeap(node<T> *in) {
 }
 
 template<typename T>
-inline void FibonacciHeap<T>::_displayChildrens(node<T> *n){
+void FibonacciHeap<T>::_displayChildrens(node<T> *n){
     if(n){
         std::cout << "value: " << n->value << (n->marked ? " (marked)" : " (not marked)") << " -> next: " << n->next->value << (n->next->marked ? " (marked)" : " (not marked)") << std::endl;
         std::cout << "value: " << n->value << (n->marked ? " (marked)" : " (not marked)") << " -> prev: " << n->prev->value << (n->prev->marked ? " (marked)" : " (not marked)") << std::endl;

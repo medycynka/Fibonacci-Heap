@@ -33,14 +33,14 @@ int main() {
     cout << endl;
 
     fh.removeMinimum();
-
     fh.displayHeap();
-    cout << endl << "Iterators test (after minimum extraction):" << endl;
+
+    cout << endl << endl;
     for(auto &e : fh) cout << e << ", ";
-    cout << endl << endl << endl;
+    cout << endl << endl;
 
     FibonacciHeap<int> fh_1;
-    cout << "Insert and extract-min test for " << test1 << " elements" << endl;
+    cout << endl << "Insert and extract-min test for " << test1 << " elements" << endl;
     auto start1_1 = std::chrono::system_clock::now();
     for(auto i = 0; i < test1; ++i) {
         fh_1.insert(i);
