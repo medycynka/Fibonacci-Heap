@@ -28,19 +28,21 @@ class node{
         inline node<T> * getPrevNodeForIteration();
         inline void printNode();
 
-        T &  operator= ( const T &input )          { value = input; };
-        bool operator==( const T &input )    const { return value == input; };
-        bool operator!=( const T &input )    const { return value != input; };
-        bool operator> ( const T &input )    const { return value > input; };
-        bool operator< ( const T &input )    const { return value < input; };
-        bool operator>=( const T &input )    const { return value >= input; };
-        bool operator<=( const T &input )    const { return value <= input; };
-        bool operator==( const node &source) const { return ( (value == source.value) && (parent == source.parent) ); };
-        bool operator!=( const node &source) const { return ( (value != source.value) || (parent != source.parent) ); };
-        bool operator> ( const node &source) const { return value > source.value; };
-        bool operator< ( const node &source) const { return value < source.value; };
-        bool operator>=( const node &source) const { return value >= source.value; };
-        bool operator<=( const node &source) const { return value <= source.value; };
+        node& operator= (const T &input)          { value = input; return *this; };
+        node& operator= (const node<T> &input);
+        node& operator= (node<T> &&input) noexcept;
+        bool  operator==(const T &input)    const { return value == input; };
+        bool  operator!=(const T &input)    const { return value != input; };
+        bool  operator> (const T &input)    const { return value > input; };
+        bool  operator< (const T &input)    const { return value < input; };
+        bool  operator>=(const T &input)    const { return value >= input; };
+        bool  operator<=(const T &input)    const { return value <= input; };
+        bool  operator==(const node &source) const { return ( (value == source.value) && (parent == source.parent) ); };
+        bool  operator!=(const node &source) const { return ( (value != source.value) || (parent != source.parent) ); };
+        bool  operator> (const node &source) const { return value > source.value; };
+        bool  operator< (const node &source) const { return value < source.value; };
+        bool  operator>=(const node &source) const { return value >= source.value; };
+        bool  operator<=(const node &source) const { return value <= source.value; };
 
         friend std::ostream& operator<<(std::ostream& ofs, const node<T>* pt){
             ofs << "Value: " << pt->value << " ,degree: " << pt->degree << (pt->marked ? " ,marked" : " ,not marked") << "\n";
@@ -57,6 +59,34 @@ class node{
             return ofs;
         };
 };
+
+template<typename T>
+node<T> &node<T>::operator=(const node<T> &input){
+    value = input.value;
+    prev = input.prev;
+    next = input.next;
+    child = input.child;
+    parent = input.parent;
+    degree = input.degree;
+    marked = input.marked;
+    iterMarked = input.iterMarked;
+
+    return *this;
+}
+
+template<typename T>
+node<T> &node<T>::operator=(node<T> &&input) noexcept{
+    value = input.value;
+    prev = input.prev;
+    next = input.next;
+    child = input.child;
+    parent = input.parent;
+    degree = input.degree;
+    marked = input.marked;
+    iterMarked = input.iterMarked;
+
+    return *this;
+}
 
 template<typename T>
 inline node<T> *node<T>::getNextNodeForIteration(){
@@ -77,7 +107,7 @@ inline node<T> *node<T>::getNextNodeForIteration(){
             return next;
         }
 
-        node* bfs_ = this;
+        auto* bfs_ = this;
 
         do{
             bfs_ = bfs_->parent;
@@ -118,7 +148,7 @@ inline node<T> *node<T>::getPrevNodeForIteration(){
             return next;
         }
 
-        node* bfs_ = this;
+        auto* bfs_ = this;
 
         do{
             bfs_ = bfs_->child;
@@ -192,8 +222,8 @@ class FibonacciHeap{
                 const Iterator operator++         (int);
                 Iterator       operator--         ();
                 const Iterator operator--         (int);
-                Iterator &     operator=          (const Iterator &source)       { this->Iter = source.Iter; return (*this); };
-                Iterator &     operator=          (Iterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
+                Iterator &     operator=          (const Iterator &source)       { Iter = source.Iter; pomHeap = source.pomHeap; wasExtraction = source.wasExtraction; return (*this); };
+                Iterator &     operator=          (Iterator &&source)   noexcept { Iter = source.Iter; pomHeap = source.pomHeap; wasExtraction = source.wasExtraction; return (*this); };
                 bool           operator==         (const Iterator& source) const { return (Iter == source.Iter); };
                 bool           operator!=         (const Iterator& source) const { return (Iter != source.Iter); };
                 explicit operator node<T> &       ()                             { return (*Iter); };
@@ -230,8 +260,8 @@ class FibonacciHeap{
                 ConstIterator const operator++    (int);
                 ConstIterator const operator--    ();
                 ConstIterator const operator--    (int);
-                ConstIterator &     operator=     (const ConstIterator &source)       { this->Iter = source.Iter; return (*this); };
-                ConstIterator &     operator=     (ConstIterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
+                ConstIterator &     operator=     (const ConstIterator &source)       { Iter = source.Iter; pomHeap = source.pomHeap; wasExtraction = source.wasExtraction; return (*this); };
+                ConstIterator &     operator=     (ConstIterator &&source)   noexcept { Iter = source.Iter; pomHeap = source.pomHeap; wasExtraction = source.wasExtraction; return (*this); };
                 bool                operator==    (const ConstIterator& source) const { return (Iter == source.Iter); };
                 bool                operator!=    (const ConstIterator& source) const { return (Iter != source.Iter); };
                 explicit operator node<T> &       ()                                  { return (*Iter); };
@@ -268,8 +298,8 @@ class FibonacciHeap{
                 const ReverseIterator operator++  (int);
                 ReverseIterator       operator--  ();
                 const ReverseIterator operator--  (int);
-                ReverseIterator &     operator=   (const ReverseIterator &source)       { this->Iter = source.Iter; return (*this); };
-                ReverseIterator &     operator=   (ReverseIterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
+                ReverseIterator &     operator=   (const ReverseIterator &source)       { Iter = source.Iter; pomHeap = source.pomHeap; wasExtraction = source.wasExtraction; return (*this); };
+                ReverseIterator &     operator=   (ReverseIterator &&source)   noexcept { Iter = source.Iter; pomHeap = source.pomHeap; wasExtraction = source.wasExtraction; return (*this); };
                 bool                  operator==  (const ReverseIterator& source) const { return (Iter == source.Iter); };
                 bool                  operator!=  (const ReverseIterator& source) const { return (Iter != source.Iter); };
                 explicit operator node<T> &       ()                                    { return (*Iter); };
@@ -306,8 +336,8 @@ class FibonacciHeap{
                 ConstReverseIterator const operator++(int);
                 ConstReverseIterator const operator--();
                 ConstReverseIterator const operator--(int);
-                ConstReverseIterator &     operator= (const ConstReverseIterator &source)       { this->Iter = source.Iter; return (*this); };
-                ConstReverseIterator &     operator= (ConstReverseIterator &&source)   noexcept { this->Iter = source.Iter; return (*this); };
+                ConstReverseIterator &     operator= (const ConstReverseIterator &source)       { Iter = source.Iter; pomHeap = source.pomHeap; wasExtraction = source.wasExtraction; return (*this); };
+                ConstReverseIterator &     operator= (ConstReverseIterator &&source)   noexcept { Iter = source.Iter; pomHeap = source.pomHeap; wasExtraction = source.wasExtraction; return (*this); };
                 bool                       operator==(const ConstReverseIterator& source) const { return (Iter == source.Iter); };
                 bool                       operator!=(const ConstReverseIterator& source) const { return (Iter != source.Iter); };
                 explicit operator node<T> &          ()                                         { return (*Iter); };
@@ -319,6 +349,7 @@ class FibonacciHeap{
 
     protected:
         node<T>* heap;
+        T        currMax = T();
         size_t   num_elems;
         bool     wasDeletion = false;
 
@@ -334,10 +365,18 @@ class FibonacciHeap{
         inline void     displayHeap();
         inline void     decreaseKey(node<T>* n, T value) { heap = _decreaseKey(heap, n, value); };
         inline node<T>* find(T value)                    { return _find(heap, value); };
-        inline bool     isEmpty() const                  { return heap == nullptr; };
+        inline bool     isEmpty()                  const { return heap == nullptr; };
         inline T        getMinimum()                     { return heap->value; };
-        inline node<T>* getRoot() const                  { return heap; };
-        inline size_t   size() const                     { return num_elems; };
+        inline node<T>* getRoot()                  const { return heap; };
+        inline size_t   size()                     const { return num_elems; };
+        inline node<T>* getCurrMax()               const { return find(currMax); };
+        inline void     clear()                          { while(!isEmpty()){ removeMinimum(); } };
+
+        FibonacciHeap<T>& operator= (const FibonacciHeap<T> &o)     { num_elems = o.num_elems; wasDeletion = o.wasDeletion; heap = o.heap; return *this; };
+        FibonacciHeap<T>& operator= (FibonacciHeap<T> &&o) noexcept { num_elems = o.num_elems; wasDeletion = o.wasDeletion; heap = o.heap; return *this; };
+        bool              operator==(const FibonacciHeap<T> &o)     { return (num_elems == o.num_elems && wasDeletion == o.wasDeletion && heap == o.heap); };
+        bool              operator!=(const FibonacciHeap<T> &o)     { return !(*this == o); };
+        FibonacciHeap<T>& operator+ (const FibonacciHeap<T> &o)     { merge(o); return *this; };
 
         inline Iterator             begin()   { return Iterator(heap, heap, wasDeletion); };
         inline Iterator             end()     { return Iterator(wasDeletion); };
@@ -352,7 +391,6 @@ class FibonacciHeap{
         inline node<T>* _empty(){ return nullptr; }
         inline node<T>* _singleton(T);
         inline node<T>* _merge(node<T>*, node<T>*);
-        inline void     _deleteAll(node<T>*);
         inline void     _addChild(node<T>*, node<T>*);
         inline void     _unMarkAndUnParentAll(node<T>*);
         inline node<T>* _removeMinimum(node<T>*);
@@ -522,7 +560,11 @@ typename FibonacciHeap<T>::ConstReverseIterator const FibonacciHeap<T>::ConstRev
 template<class T>
 node<T> *FibonacciHeap<T>::insert(T value){
     node<T>* ret = _singleton(value);
-    if(ret) num_elems++;
+    if(ret){
+        num_elems++;
+
+        if(ret->value > currMax) currMax = ret->value;
+    }
 
     heap = _merge(heap, ret);
 
@@ -537,9 +579,9 @@ void FibonacciHeap<T>::merge(FibonacciHeap &other){
 
 template<class T>
 T FibonacciHeap<T>::removeMinimum(){
-    node<T>* old = heap;
+    auto* old = heap;
     heap = _removeMinimum(heap);
-    T ret = old->value;
+    auto ret = old->value;
     delete old;
     num_elems--;
     wasDeletion = true;
@@ -572,32 +614,19 @@ node<T> *FibonacciHeap<T>::_merge(node<T> *a, node<T> *b){
     if(a == nullptr) return b;
     if(b == nullptr) return a;
     if(a->value > b->value){
-        node<T>* temp = a;
+        auto* temp = a;
         a = b;
         b = temp;
     }
 
-    node<T>* an = a->next;
-    node<T>* bp = b->prev;
+    auto* an = a->next;
+    auto* bp = b->prev;
     a->next = b;
     b->prev = a;
     an->prev = bp;
     bp->next = an;
 
     return a;
-}
-
-template<class T>
-void FibonacciHeap<T>::_deleteAll(node<T> *n){
-    if(n != nullptr) {
-        node<T>* c = n;
-        do{
-            node<T>* d = c;
-            c = c->next;
-            _deleteAll(d->child);
-            delete d;
-        }while(c != n);
-    }
 }
 
 template<class T>
@@ -613,7 +642,7 @@ template<class T>
 void FibonacciHeap<T>::_unMarkAndUnParentAll(node<T> *n){
     if(n == nullptr) return;
 
-    node<T>* c = n;
+    auto* c = n;
 
     do{
         c->marked = false;
@@ -639,7 +668,7 @@ node<T> *FibonacciHeap<T>::_removeMinimum(node<T> *n){
 
     while(true){
         if(trees[n->degree]!=nullptr){
-            node<T>* t = trees[n->degree];
+            auto* t = trees[n->degree];
 
             if(t == n) break;
 
@@ -677,8 +706,8 @@ node<T> *FibonacciHeap<T>::_removeMinimum(node<T> *n){
         n = n->next;
     }
 
-    node<T>* min = n;
-    node<T>* start = n;
+    auto* min = n;
+    auto* start = n;
 
     do{
         if(n->value < min->value) min=n;
@@ -713,7 +742,7 @@ node<T> *FibonacciHeap<T>::_decreaseKey(node<T> *heap_, node<T> *n, T value){
     if(n->parent){
         if(n->value < n->parent->value) {
             heap_ = _cut(heap_, n);
-            node<T>* parent = n->parent;
+            auto* parent = n->parent;
             n->parent = nullptr;
 
             while(parent != nullptr && parent->marked) {
@@ -733,13 +762,13 @@ node<T> *FibonacciHeap<T>::_decreaseKey(node<T> *heap_, node<T> *n, T value){
 
 template<class T>
 node<T> *FibonacciHeap<T>::_find(node<T> *heap_, T value){
-    node<T>* n = heap_;
+    auto* n = heap_;
 
     if(n == nullptr) return nullptr;
 
     do{
         if(n->value == value) return n;
-        node<T>* ret = _find(n->child, value);
+        auto* ret = _find(n->child, value);
 
         if(ret) return ret;
 
@@ -752,7 +781,7 @@ node<T> *FibonacciHeap<T>::_find(node<T> *heap_, T value){
 template<typename T>
 void FibonacciHeap<T>::_displayHeap(node<T> *in) {
     if(in){
-        node<T> *c = in;
+        auto *c = in;
 
         std::cout << "Minimum -> " << heap->value << std::endl;
         do{
@@ -771,7 +800,7 @@ void FibonacciHeap<T>::_displayChildrens(node<T> *n){
         else std::cout << "No parent" << std::endl;
 
         if(n->hasChildren()){
-            node<T>* c = n->child;
+            auto* c = n->child;
             do {
                 std::cout << "parent value: " << n->value << (n->marked ? " (marked)" : " (not marked)") << " -> child: " << n->child->value << (n->child->marked ? " (marked)" : " (not marked)") << std::endl << std::endl;
                 _displayChildrens(c);
